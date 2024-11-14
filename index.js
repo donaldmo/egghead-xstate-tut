@@ -1,37 +1,38 @@
-const STATES = {
-    lit: 'lit',
-    unlit: 'unlit',
-    broken: 'broken'
-}
+const { Machine } = require('xstate')
 
-function lightBulb() {
-    let state = STATES.unlit
-
-    return {
-        state() {
-            return state
-        },
-        toggle() {
-            switch (state) {
-                case STATES.lit:
-                    state = STATES.unlit
-                    break
-                case STATES.unlit:
-                    state = STATES.lit
-                    break
-            }
-        },
-        break() {
-            state = STATES.broken
-        }
+const lit = {
+    on: {
+        BREAK: 'broken',
+        TOGGLE: 'unlit'
     }
 }
 
-const bulb = lightBulb()
-const log = () => {
-    console.log(bulb.state())
+const unlit = {
+    on: {
+        BREAK: 'broken',
+        TOGGLE: 'lit'
+    }
 }
 
-bulb.toggle()
-bulb.break()
-log()
+const broken = {
+    type: 'final'
+}
+
+const states = { lit, unlit, broken }
+
+const initial = 'unlit'
+
+const config = {
+    id: 'lightBulb',
+    initial,
+    states,
+    strict: true
+}
+
+const lightBulbMachine = Machine(config)
+
+// console.log(lightBulbMachine.transition('unlit', 'TOGGLE').value)
+// console.log(lightBulbMachine.transition('lit', 'TOGGLE').value)
+// console.log(lightBulbMachine.transition('broken', 'TOGGLE').value)
+// console.log(lightBulbMachine.transition('foo', 'TOGGLE').value)
+console.log(lightBulbMachine.transition('lit', 'FOO').value)
