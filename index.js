@@ -5,25 +5,25 @@ const lit = {
         BREAK: 'broken',
         TOGGLE: 'unlit',
     },
+    exit: (context, event) => console.log('Exit state: ', event.type)
 };
 
 const unlit = {
     on: {
-        BREAK: {
-            target: 'broken',
-            actions: ['logBroken'],
-        },
+        BREAK: 'broken',
         TOGGLE: 'lit',
     },
 };
 
-const broken = { type: 'final' };
+const broken = {
+    entry: 'logBroken'
+};
 
 const states = { lit, unlit, broken };
 
 const actions = {
     logBroken: (context, event) => {
-        console.log(context, event);
+        console.log('Log broken: ', event)
     },
 };
 
@@ -44,7 +44,7 @@ const service = interpret(lightBulbMachine).start();
 
 service.onTransition((state) => {
     if (state.changed) {
-        console.log('State changed: ', state.value);
+        console.log('State changed to ', state.value);
     }
 
     if (state.matches('broken')) {
@@ -54,4 +54,4 @@ service.onTransition((state) => {
 
 service.send('TOGGLE'); // unlit -> lit
 service.send('TOGGLE'); // lit -> unlit
-service.send('BREAK');  // unlit -> broken
+service.send({ 'type': 'BREAK', 'location': 'office' });  // unlit -> broken
