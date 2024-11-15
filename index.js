@@ -1,4 +1,4 @@
-const { Machine } = require('xstate')
+const { Machine, interpret } = require('xstate')
 
 const lit = {
     on: {
@@ -14,25 +14,40 @@ const unlit = {
     }
 }
 
-const broken = {
-    type: 'final'
-}
+const broken = { type: 'final' }
 
 const states = { lit, unlit, broken }
 
-const initial = 'unlit'
-
 const config = {
     id: 'lightBulb',
-    initial,
+    initial: 'unlit',
     states,
     strict: true
 }
 
-const lightBulbMachine = Machine(config)
+const lightBulbMachine = Machine({
+    id: 'lightBulb',
+    initial: 'unlit',
+    states,
+    strict: true
+})
 
-// console.log(lightBulbMachine.transition('unlit', 'TOGGLE').value)
-// console.log(lightBulbMachine.transition('lit', 'TOGGLE').value)
-// console.log(lightBulbMachine.transition('broken', 'TOGGLE').value)
-// console.log(lightBulbMachine.transition('foo', 'TOGGLE').value)
-console.log(lightBulbMachine.transition('lit', 'FOO').value)
+const service = interpret(
+    lightBulbMachine
+).start()
+
+service.onTransition(state => {
+
+    if (state.changed) {
+        console.log('State changed: ', state.value)
+    }
+
+    if (state.matches('broken')) {
+        console.log('State is broken: ', state.value)
+    }
+})
+
+service.send('TOGGLE')
+service.send('TOGGLE')
+service.send('BREAK')
+
